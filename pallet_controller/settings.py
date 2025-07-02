@@ -28,12 +28,21 @@ DEBUG = os.environ.get('DEBUG', 'False').lower() == 'False'
 
 #ALLOWED_HOSTS = ['ponto.nfiscal.com.br', 'localhost']
 
+
 ALLOWED_HOSTS = []
 
-# Adicione esta lógica para popular a lista
-HEROKU_APP_NAME = os.environ.get('intelliponto')
-if HEROKU_APP_NAME:
-    ALLOWED_HOSTS.append(f"{HEROKU_APP_NAME}.herokuapp.com")
+# Lógica para adicionar o domínio do Heroku dinamicamente
+# O Heroku define a variável 'DYNO' no ambiente de execução.
+# Podemos usá-la para saber que estamos em produção.
+if 'DYNO' in os.environ:
+    # Adiciona o domínio principal do Heroku e o www (boa prática)
+    ALLOWED_HOSTS.append('epallet-41b825a7d788.herokuapp.com')
+    ALLOWED_HOSTS.append('www.epallet-41b825a7d788.herokuapp.com')
+
+# Para desenvolvimento local, você pode adicionar o host local
+# Apenas se DEBUG for True
+if os.environ.get('DEBUG', 'False').lower() == 'true':
+    ALLOWED_HOSTS.append('127.0.0.1')
 
 
 # Application definition
