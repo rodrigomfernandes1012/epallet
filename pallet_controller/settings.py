@@ -188,7 +188,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # Se sua página principal é a raiz, '/' é uma opção segura.
 # Se você tem uma rota como path('dashboard/', views.dash, name='dashboard'),
 # use 'dashboard'. Vamos começar com '/'.
-LOGIN_REDIRECT_URL = '/painel'
+LOGIN_REDIRECT_URL = '/clientes'
 
 # Para onde o usuário vai após fazer logout.
 # Geralmente, é a página de login ou a página inicial.
