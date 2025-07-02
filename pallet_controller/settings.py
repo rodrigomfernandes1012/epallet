@@ -179,4 +179,22 @@ STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+# --------------------------------------------------------------------------
+# CONFIGURAÇÕES DE AUTENTICAÇÃO E REDIRECIONAMENTO
+# --------------------------------------------------------------------------
+
+# Para onde o usuário vai após um login bem-sucedido.
+# Use o NOME da sua rota de dashboard ou página principal.
+# Se sua página principal é a raiz, '/' é uma opção segura.
+# Se você tem uma rota como path('dashboard/', views.dash, name='dashboard'),
+# use 'dashboard'. Vamos começar com '/'.
+LOGIN_REDIRECT_URL = '/painel'
+
+# Para onde o usuário vai após fazer logout.
+# Geralmente, é a página de login ou a página inicial.
+LOGIN_URL = '/logout' # A página que contém seu formulário de login
+
+# Para onde o usuário vai após um logout bem-sucedido.
+LOGOUT_REDIRECT_URL = '/logout'
+
 
