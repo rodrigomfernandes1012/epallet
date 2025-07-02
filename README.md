@@ -7,6 +7,9 @@
 0.5 – Após o cadastro, o usuário será redirecionado para a tela de Login, onde deve autenticar-se utilizando username e senha.
 
 0.6 – Após o login, o usuário terá acesso a uma área restrita, sendo identificado como usuário autenticado, com permissões para CRUD parcial (Create, Read e Update).
+#.
+
+#teste 
 
 - Sessão e Atribuição de Registros
 1.0 – Após o primeiro login, a sessão permanecerá ativa até o usuário realizar o logout manualmente.
