@@ -435,8 +435,8 @@ class ValePalletForm(forms.ModelForm):
 
     def clean(self):
         cleaned_data = super().clean()
-        #if not hasattr(self.user, 'pessoa_juridica'):
-            #raise forms.ValidationError("Usuário não está associado a uma pessoa jurídica")
+        if not hasattr(self.user, 'pessoa_juridica'):
+            raise forms.ValidationError("Usuário não está associado a uma pessoa jurídica")
         return cleaned_data
 
     def save(self, commit=True):
