@@ -66,14 +66,35 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'pallet_controller.wsgi.application'
 
-# Database configuration
-DATABASES = {
-    'default': dj_database_url.config(
-        default=os.environ.get('DATABASE_URL'),
-        conn_max_age=600,
-        ssl_require=True
-    )
-}
+# ============================================================================
+# CONFIGURAÇÃO DO BANCO DE DADOS - SUPABASE
+# ============================================================================
+
+# Configuração para usar Supabase em produção e desenvolvimento
+if 'DYNO' in os.environ:
+    # PRODUÇÃO: Usar Supabase via variável de ambiente DATABASE_URL
+    DATABASES = {
+        'default': dj_database_url.config(
+            default=os.environ.get('DATABASE_URL'),
+            conn_max_age=600,
+            ssl_require=True  # Essencial para conexões externas
+        )
+    }
+else:
+    # DESENVOLVIMENTO: Configuração direta do Supabase
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': 'postgres',
+            'USER': 'postgres',
+            'PASSWORD': '5IEvXIKjw9BN2QOx',  # Substitua pela sua senha real
+            'HOST': 'db.zyeaqpsltgavouygatxs.supabase.co',
+            'PORT': '5432',
+            'OPTIONS': {
+                'sslmode': 'require',  # Importante para Supabase
+            },
+        }
+    }
 
 # Authentication backends
 AUTHENTICATION_BACKENDS = [
@@ -130,6 +151,31 @@ STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 # Default primary key field type
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# Configurações do Supabase (se necessário)
+# ============================================================================
+# CONFIGURAÇÕES DO SUPABASE
+# ============================================================================
+
+# Configurações do Supabase para uso nas views/APIs
 SUPABASE_URL = os.environ.get('SUPABASE_URL', 'https://zyeaqpsltgavouygatxs.supabase.co')
 SUPABASE_KEY = os.environ.get('SUPABASE_KEY', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp5ZWFxcHNsdGdhdm91eWdhdHhzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDc4MjQ4NDMsImV4cCI6MjA2MzQwMDg0M30.L9SVkjKQk2cVygHIIcjC0T9YQ_SEZXRUvSSMOYhDWvE')
+
+# Configurações de logging para debug
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+        },
+    },
+    'root': {
+        'handlers': ['console'],
+    },
+    'loggers': {
+        'django.db.backends': {
+            'level': 'DEBUG' if DEBUG else 'INFO',
+            'handlers': ['console'],
+        },
+    },
+}
+
