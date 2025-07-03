@@ -2,6 +2,12 @@ import os
 from pathlib import Path
 import dj_database_url
 
+import socket
+
+# Forçar IPv4
+socket.getaddrinfo = lambda host, port, family=0, type=0, proto=0, flags=0: \
+    socket.getaddrinfo(host, port, socket.AF_INET, type, proto, flags)
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
