@@ -2,12 +2,6 @@ import os
 from pathlib import Path
 import dj_database_url
 
-import socket
-
-# Forçar IPv4
-socket.getaddrinfo = lambda host, port, family=0, type=0, proto=0, flags=0: \
-    socket.getaddrinfo(host, port, socket.AF_INET, type, proto, flags)
-
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -20,11 +14,16 @@ DEBUG = os.environ.get('DEBUG', 'False').lower() == 'true'
 # Configuração de hosts permitidos
 ALLOWED_HOSTS = []
 
-# Lógica para adicionar o domínio do Heroku dinamicamente
-if 'DYNO' in os.environ:
-    # Adiciona o domínio principal do Heroku
-    ALLOWED_HOSTS.append('epallet-41b825a7d788.herokuapp.com')
-    ALLOWED_HOSTS.append('www.epallet-41b825a7d788.herokuapp.com')
+# Railway detection and configuration
+if 'RAILWAY_ENVIRONMENT' in os.environ:
+    # Produção no Railway
+    ALLOWED_HOSTS.append('.railway.app')
+    ALLOWED_HOSTS.append('.up.railway.app')
+
+    # Se você tiver um domínio customizado, adicione aqui
+    custom_domain = os.environ.get('CUSTOM_DOMAIN')
+    if custom_domain:
+        ALLOWED_HOSTS.append(custom_domain)
 
 # Para desenvolvimento local
 if DEBUG:
@@ -76,14 +75,14 @@ WSGI_APPLICATION = 'pallet_controller.wsgi.application'
 # CONFIGURAÇÃO DO BANCO DE DADOS - SUPABASE
 # ============================================================================
 
-# Configuração para usar Supabase em produção e desenvolvimento
-if 'DYNO' in os.environ:
-    # PRODUÇÃO: Usar Supabase via variável de ambiente DATABASE_URL
+# Configuração para Railway + Supabase
+if 'RAILWAY_ENVIRONMENT' in os.environ:
+    # PRODUÇÃO: Usar Supabase via variável de ambiente
     DATABASES = {
         'default': dj_database_url.config(
             default=os.environ.get('DATABASE_URL'),
             conn_max_age=600,
-            ssl_require=True  # Essencial para conexões externas
+            ssl_require=True
         )
     }
 else:
@@ -93,11 +92,11 @@ else:
             'ENGINE': 'django.db.backends.postgresql',
             'NAME': 'postgres',
             'USER': 'postgres',
-            'PASSWORD': '5IEvXIKjw9BN2QOx',  # Substitua pela sua senha real
+            'PASSWORD': '5IEvXIKjw9BN2QOx',
             'HOST': 'db.zyeaqpsltgavouygatxs.supabase.co',
             'PORT': '5432',
             'OPTIONS': {
-                'sslmode': 'require',  # Importante para Supabase
+                'sslmode': 'require',
             },
         }
     }
@@ -161,11 +160,11 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # CONFIGURAÇÕES DO SUPABASE
 # ============================================================================
 
-# Configurações do Supabase para uso nas views/APIs
 SUPABASE_URL = os.environ.get('SUPABASE_URL', 'https://zyeaqpsltgavouygatxs.supabase.co')
-SUPABASE_KEY = os.environ.get('SUPABASE_KEY', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp5ZWFxcHNsdGdhdm91eWdhdHhzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDc4MjQ4NDMsImV4cCI6MjA2MzQwMDg0M30.L9SVkjKQk2cVygHIIcjC0T9YQ_SEZXRUvSSMOYhDWvE')
+SUPABASE_KEY = os.environ.get('SUPABASE_KEY',
+                              'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp5ZWFxcHNsdGdhdm91eWdhdHhzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDc4MjQ4NDMsImV4cCI6MjA2MzQwMDg0M30.L9SVkjKQk2cVygHIIcjC0T9YQ_SEZXRUvSSMOYhDWvE')
 
-# Configurações de logging para debug
+# Configurações de logging
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
@@ -184,4 +183,11 @@ LOGGING = {
         },
     },
 }
+
+# Configurações de segurança para produção
+if 'RAILWAY_ENVIRONMENT' in os.environ:
+    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+    SECURE_SSL_REDIRECT = True
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
 
