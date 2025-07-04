@@ -21,9 +21,12 @@ from django.db.models import F, Q, Count, Sum
 from datetime import timedelta
 import datetime
 import json
+<<<<<<< HEAD
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
 
+=======
+>>>>>>> c4adc9abb5167d69417fb69affbbc97fdcd30829
 
 logger = logging.getLogger(__name__)
 
@@ -132,16 +135,23 @@ def cadastrar_pessoa_juridica(request):
 @login_required
 def painel_usuario(request):
     """Painel principal após login."""
+<<<<<<< HEAD
     # Se o usuário for staff, redireciona para movimentações
     if request.user.is_staff:
         return redirect('movimentacao_listar')
     
     # Para usuários não-staff, mostra o painel normal
+=======
+>>>>>>> c4adc9abb5167d69417fb69affbbc97fdcd30829
     context = {
         'is_staff': request.user.is_staff,
         'has_pj': hasattr(request.user, 'pessoa_juridica')
     }
     return render(request, 'cadastro/painel_usuario.html', context)
+<<<<<<< HEAD
+=======
+
+>>>>>>> c4adc9abb5167d69417fb69affbbc97fdcd30829
 # ==============================================
 # CRUD CLIENTES
 # ==============================================
@@ -456,6 +466,7 @@ def transportadora_remover(request, id):
 @require_http_methods(["GET"])
 def valepallet_listar(request):
     """Lista vales - todos veem, mas staff veem mais"""
+<<<<<<< HEAD
     # Verificar permissões e obter queryset base
     if request.user.is_staff:
         vales = ValePallet.objects.all().select_related(
@@ -548,6 +559,22 @@ def valepallet_listar(request):
         'usuarios': usuarios,
         'transportadoras': transportadoras,
         'clientes': clientes,
+=======
+    if request.user.is_staff:
+        vales = ValePallet.objects.all().select_related(
+            'cliente', 'motorista', 'transportadora', 'criado_por'
+        )
+    elif hasattr(request.user, 'pessoa_juridica'):
+        vales = ValePallet.objects.filter(
+            criado_por=request.user.pessoa_juridica
+        ).select_related('cliente', 'motorista', 'transportadora')
+    else:
+        messages.error(request, 'Acesso não autorizado')
+        return redirect('painel_usuario')
+    
+    return render(request, 'cadastro/valepallet/listar.html', {
+        'vales': vales,
+>>>>>>> c4adc9abb5167d69417fb69affbbc97fdcd30829
         'is_staff': request.user.is_staff,
         'titulo': 'Vales Pallets',
         'url_cadastro': 'valepallet_cadastrar',
@@ -944,35 +971,58 @@ def movimentacao_listar(request):
         data_emissao__lt=hoje - timedelta(days=180)
     ).count()
 
+<<<<<<< HEAD
     # Agregação por fornecedor (TODOS os fornecedores para a tabela)
     fornecedores_completo = vales.values(
+=======
+    # Agregação por fornecedor (TOP 3 por quantidade de pallets)
+    fornecedores_data = vales.values(
+>>>>>>> c4adc9abb5167d69417fb69affbbc97fdcd30829
         'criado_por__usuario__username'
     ).annotate(
         total_pallets=Sum(F('qtd_pbr') + F('qtd_chepp')),
         vale_count=Count('id')
+<<<<<<< HEAD
     ).order_by('-total_pallets')
 
     # TOP 3 fornecedores apenas para o gráfico
     top_fornecedores = list(fornecedores_completo[:3])
 
     # Preparar dados para o gráfico (apenas top 3)
+=======
+    ).order_by('-total_pallets')[:3]
+
+    # Preparar dados para o gráfico
+>>>>>>> c4adc9abb5167d69417fb69affbbc97fdcd30829
     grafico_labels = []
     grafico_data = []
     grafico_cores = []
     grafico_tipos = []
 
+<<<<<<< HEAD
     for item in top_fornecedores:
+=======
+    for item in fornecedores_data:
+>>>>>>> c4adc9abb5167d69417fb69affbbc97fdcd30829
         grafico_labels.append(item['criado_por__usuario__username'] or 'Sem responsável')
         grafico_data.append(item['total_pallets'])
         grafico_cores.append('rgba(13, 110, 253, 0.7)')
         grafico_tipos.append('Pallets')
 
+<<<<<<< HEAD
     # Formatando para a tabela de fornecedores (TODOS os fornecedores)
+=======
+    # Formatando para a tabela de fornecedores
+>>>>>>> c4adc9abb5167d69417fb69affbbc97fdcd30829
     fornecedores_data = [{
         'responsavel__username': item['criado_por__usuario__username'] or 'Sem responsável',
         'vale': item['vale_count'],
         'pallets': item['total_pallets']
+<<<<<<< HEAD
     } for item in fornecedores_completo]
+=======
+    } for item in fornecedores_data]
+>>>>>>> c4adc9abb5167d69417fb69affbbc97fdcd30829
 
     # Se não houver fornecedores, cria um registro vazio para evitar erros
     if not fornecedores_data:
@@ -1129,7 +1179,10 @@ def movimentacao_registrar(request):
         'titulo': 'Registrar Movimentação',
         'url_retorno': 'valepallet_listar'
     })
+<<<<<<< HEAD
 
+=======
+>>>>>>> c4adc9abb5167d69417fb69affbbc97fdcd30829
 @login_required
 @require_http_methods(["GET"])
 def dashboard_filtrar(request):
@@ -1150,11 +1203,16 @@ def dashboard_filtrar(request):
     
     # Definir intervalo de datas com base no período
     if periodo == 'hoje':
+<<<<<<< HEAD
+=======
+        # Filtra vales emitidos hoje (considerando o fuso horário local)
+>>>>>>> c4adc9abb5167d69417fb69affbbc97fdcd30829
         inicio_dia = timezone.make_aware(datetime.datetime.combine(hoje_local, datetime.time.min))
         fim_dia = timezone.make_aware(datetime.datetime.combine(hoje_local, datetime.time.max))
         vales = vales.filter(data_emissao__range=(inicio_dia, fim_dia))
         
     elif periodo == 'semana':
+<<<<<<< HEAD
         dia_da_semana = hoje_local.weekday()
         if dia_da_semana == 6:
             inicio_semana = hoje_local
@@ -1193,6 +1251,61 @@ def dashboard_filtrar(request):
         vales = vales.filter(data_emissao__range=(inicio_ano, fim_ano))
 
     # Métricas de status
+=======
+        # Lógica de semana de Domingo a Sábado
+        dia_da_semana = hoje_local.weekday()  # 0=segunda, 6=domingo
+        
+        if dia_da_semana == 6:  # Domingo
+            inicio_semana = hoje_local
+        elif dia_da_semana == 5:  # Sábado
+            inicio_semana = hoje_local - datetime.timedelta(days=5)
+        else:  # Dias entre Segunda e Sexta
+            inicio_semana = hoje_local - datetime.timedelta(days=dia_da_semana + 1)
+            
+        fim_semana = inicio_semana + datetime.timedelta(days=6)
+        
+        # Converter para datetime com fuso horário
+        inicio_semana_dt = timezone.make_aware(datetime.datetime.combine(inicio_semana, datetime.time.min))
+        fim_semana_dt = timezone.make_aware(datetime.datetime.combine(fim_semana, datetime.time.max))
+        
+        vales = vales.filter(data_emissao__range=(inicio_semana_dt, fim_semana_dt))
+        
+    elif periodo == 'mes':
+        # Filtra vales emitidos no mês atual (considerando o primeiro e último dia do mês no fuso local)
+        primeiro_dia = hoje_local.replace(day=1)
+        ultimo_dia = (hoje_local.replace(day=28) + datetime.timedelta(days=4)).replace(day=1) - datetime.timedelta(days=1)
+        
+        inicio_mes = timezone.make_aware(datetime.datetime.combine(primeiro_dia, datetime.time.min))
+        fim_mes = timezone.make_aware(datetime.datetime.combine(ultimo_dia, datetime.time.max))
+        
+        vales = vales.filter(data_emissao__range=(inicio_mes, fim_mes))
+        
+    elif periodo == 'trimestre':
+        # Filtra vales emitidos no trimestre atual
+        trimestre_atual = (hoje_local.month - 1) // 3 + 1
+        mes_inicio = 3 * (trimestre_atual - 1) + 1
+        mes_fim = mes_inicio + 2
+        
+        primeiro_dia = hoje_local.replace(month=mes_inicio, day=1)
+        ultimo_dia = (hoje_local.replace(month=mes_fim, day=28) + datetime.timedelta(days=4)).replace(day=1) - datetime.timedelta(days=1)
+        
+        inicio_trimestre = timezone.make_aware(datetime.datetime.combine(primeiro_dia, datetime.time.min))
+        fim_trimestre = timezone.make_aware(datetime.datetime.combine(ultimo_dia, datetime.time.max))
+        
+        vales = vales.filter(data_emissao__range=(inicio_trimestre, fim_trimestre))
+        
+    elif periodo == 'ano':
+        # Filtra vales emitidos no ano atual
+        primeiro_dia = hoje_local.replace(month=1, day=1)
+        ultimo_dia = hoje_local.replace(month=12, day=31)
+        
+        inicio_ano = timezone.make_aware(datetime.datetime.combine(primeiro_dia, datetime.time.min))
+        fim_ano = timezone.make_aware(datetime.datetime.combine(ultimo_dia, datetime.time.max))
+        
+        vales = vales.filter(data_emissao__range=(inicio_ano, fim_ano))
+
+    # Métricas de status (usando hoje_local para consistência)
+>>>>>>> c4adc9abb5167d69417fb69affbbc97fdcd30829
     a_vencer = vales.filter(
         data_saida__isnull=False,
         data_retorno__isnull=True,
@@ -1216,11 +1329,17 @@ def dashboard_filtrar(request):
 
     # Função auxiliar para calcular a soma de pallets
     def calcular_pallets(queryset):
+<<<<<<< HEAD
         result = queryset.aggregate(
             total_pbr=Sum('qtd_pbr', default=0),
             total_chepp=Sum('qtd_chepp', default=0)
         )
         return (result['total_pbr'] or 0) + (result['total_chepp'] or 0)
+=======
+        return queryset.aggregate(
+            total=Sum(F('qtd_pbr') + F('qtd_chepp'))
+        )['total'] or 0
+>>>>>>> c4adc9abb5167d69417fb69affbbc97fdcd30829
 
     # Métricas de pallets
     pallets_movimentacao = calcular_pallets(vales.filter(
@@ -1241,7 +1360,11 @@ def dashboard_filtrar(request):
     
     total_pallets = calcular_pallets(vales)
 
+<<<<<<< HEAD
     # Dias em aberto
+=======
+    # Dias em aberto (baseado na data_emissao)
+>>>>>>> c4adc9abb5167d69417fb69affbbc97fdcd30829
     menos_30_dias = vales.filter(
         data_emissao__date__gte=hoje_local - datetime.timedelta(days=30)
     ).count()
@@ -1260,6 +1383,7 @@ def dashboard_filtrar(request):
         data_emissao__date__lt=hoje_local - datetime.timedelta(days=180)
     ).count()
 
+<<<<<<< HEAD
     # Agregação por fornecedor sem Coalesce
     fornecedores_completo = vales.values(
         'criado_por__usuario__username'
@@ -1274,21 +1398,43 @@ def dashboard_filtrar(request):
     top_fornecedores = fornecedores_completo[:3]
 
     # Preparar dados para o gráfico (apenas top 3)
+=======
+    # Agregação por fornecedor
+    fornecedores_data = vales.values(
+        'criado_por__usuario__username'
+    ).annotate(
+        total_pallets=Sum(F('qtd_pbr') + F('qtd_chepp')),
+        vale_count=Count('id')
+    ).order_by('-total_pallets')[:3]
+
+    # Preparar dados para o gráfico
+>>>>>>> c4adc9abb5167d69417fb69affbbc97fdcd30829
     grafico_labels = []
     grafico_data = []
     grafico_cores = []
 
+<<<<<<< HEAD
     for item in top_fornecedores:
         grafico_labels.append(item['criado_por__usuario__username'] or 'Sem responsável')
         grafico_data.append(item['total_pallets'] or 0)
+=======
+    for item in fornecedores_data:
+        grafico_labels.append(item['criado_por__usuario__username'] or 'Sem responsável')
+        grafico_data.append(item['total_pallets'])
+>>>>>>> c4adc9abb5167d69417fb69affbbc97fdcd30829
         grafico_cores.append('rgba(13, 110, 253, 0.7)')
 
     # Formatando para a tabela de fornecedores
     fornecedores_data = [{
         'responsavel__username': item['criado_por__usuario__username'] or 'Sem responsável',
         'vale': item['vale_count'],
+<<<<<<< HEAD
         'pallets': item['total_pallets'] or 0
     } for item in fornecedores_completo]
+=======
+        'pallets': item['total_pallets']
+    } for item in fornecedores_data]
+>>>>>>> c4adc9abb5167d69417fb69affbbc97fdcd30829
 
     return JsonResponse({
         'a_vencer': a_vencer,
@@ -1316,7 +1462,10 @@ def dashboard_filtrar(request):
             'pallets': total_pallets
         }
     })
+<<<<<<< HEAD
 
+=======
+>>>>>>> c4adc9abb5167d69417fb69affbbc97fdcd30829
 # ===== APIs EXTERNAS =====
 @require_GET
 def validar_cnpj_api(request):

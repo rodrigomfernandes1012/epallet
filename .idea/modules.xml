@@ -2,7 +2,11 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
+<<<<<<< HEAD
       <module fileurl="file://$PROJECT_DIR$/.idea/epallet.iml" filepath="$PROJECT_DIR$/.idea/epallet.iml" />
+=======
+      <module fileurl="file://$PROJECT_DIR$/.idea/pallet_controll-main.iml" filepath="$PROJECT_DIR$/.idea/pallet_controll-main.iml" />
+>>>>>>> c4adc9abb5167d69417fb69affbbc97fdcd30829
     </modules>
   </component>
 </project>
